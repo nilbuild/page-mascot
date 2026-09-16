@@ -1,12 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "page-mascot",
+  "name": "mascot-studio",
   "compatibility_date": "2026-09-01",
-  // The demo is a static site served under koboyo.com/page-mascot, so it is a Worker
-  // route rather than a Pages project: koboyo.com itself is served by another project.
-  "assets": { "directory": "./site-build", "html_handling": "drop-trailing-slash" },
-  "routes": [
-    { "pattern": "koboyo.com/page-mascot", "zone_name": "koboyo.com" },
-    { "pattern": "koboyo.com/page-mascot/*", "zone_name": "koboyo.com" }
-  ]
+  "assets": { "directory": "./site-build" }
 }

@@ -26,7 +26,7 @@ const REACTIONS = [
 ] as const
 
 type Direction = (typeof DIRECTIONS)[number]
-type Reaction = (typeof REACTIONS)[number]
+export type Reaction = (typeof REACTIONS)[number]
 
 // Clockwise from the right, matching atan2 with y pointing down.
 const CLOCKWISE: Direction[] = [
@@ -84,10 +84,28 @@ export type MascotProps = {
   className?: string
   /** What a screen reader calls it. */
   label?: string
+  /** Follow the pointer. Defaults to true. */
+  tracking?: boolean
+  /** React and bounce when clicked. Defaults to true. */
+  interactive?: boolean
+  /** Pin an expression; null lets click reactions play normally. */
+  expression?: Reaction | null
+  /** Mirror the artwork while keeping pointer tracking aligned. */
+  flip?: boolean
 }
 
 export function Mascot(props: MascotProps) {
-  const { directions, reactions, size = 140, className, label = 'mascot' } = props
+  const {
+    directions,
+    reactions,
+    size = 140,
+    className,
+    label = 'mascot',
+    tracking = true,
+    interactive = true,
+    expression = null,
+    flip = false,
+  } = props
 
   const buttonRef = useRef<HTMLButtonElement>(null)
   const squashRef = useRef<HTMLSpanElement>(null)
@@ -97,7 +115,7 @@ export function Mascot(props: MascotProps) {
   const [reaction, setReaction] = useState<Reaction | null>(null)
 
   useEffect(() => {
-    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    if (!tracking || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
       return
     }
 
@@ -111,7 +129,7 @@ export function Mascot(props: MascotProps) {
       }
 
       const box = button.getBoundingClientRect()
-      const dx = pointer.x - (box.left + box.width / 2)
+      const dx = (pointer.x - (box.left + box.width / 2)) * (flip ? -1 : 1)
       const dy = pointer.y - (box.top + box.height / 2)
 
       if (Math.hypot(dx, dy) < DEAD_ZONE) {
@@ -142,7 +160,7 @@ export function Mascot(props: MascotProps) {
       window.removeEventListener('pointermove', onPointerMove)
       window.removeEventListener('scroll', aim)
     }
-  }, [])
+  }, [tracking, flip])
 
   useEffect(() => {
     return () => {
@@ -151,6 +169,7 @@ export function Mascot(props: MascotProps) {
   }, [])
 
   const boop = () => {
+    if (!interactive || expression) return
     timersRef.current.forEach(window.clearTimeout)
     timersRef.current = []
 
@@ -182,13 +201,16 @@ export function Mascot(props: MascotProps) {
     squashRef.current?.animate(SQUASH, { duration: SQUASH_MS, easing: 'linear' })
   }
 
+  const visibleReaction = expression ?? (interactive ? reaction : null)
+
   // Inline styles so the file drops into any project without a CSS framework.
   return (
     <button
       ref={buttonRef}
       type="button"
       onClick={boop}
-      aria-label={`Boop the ${label}`}
+      aria-label={interactive && !expression ? `Boop the ${label}` : label}
+      disabled={!interactive || !!expression}
       className={className}
       style={{
         position: 'relative',
@@ -200,20 +222,27 @@ export function Mascot(props: MascotProps) {
         border: 0,
         background: 'transparent',
         appearance: 'none',
-        cursor: 'pointer',
+        cursor: interactive && !expression ? 'pointer' : 'default',
         userSelect: 'none',
       }}
     >
       <span
         ref={squashRef}
-        style={{ position: 'relative', display: 'block', width: '100%', height: '100%', transformOrigin: '50% 78%' }}
+        style={{
+          position: 'relative',
+          display: 'block',
+          width: '100%',
+          height: '100%',
+          transformOrigin: '50% 78%',
+        }}
       >
         <span
           style={{
             ...layer,
             backgroundImage: `url(${directions})`,
-            ...cell(DIRECTIONS.indexOf(direction)),
-            opacity: reaction ? 0 : 1,
+            transform: flip ? 'scaleX(-1)' : undefined,
+            ...cell(DIRECTIONS.indexOf(tracking ? direction : 'center')),
+            opacity: visibleReaction ? 0 : 1,
           }}
         />
         {/* Always mounted so the sheet is fetched up front, never on the first click. */}
@@ -221,8 +250,9 @@ export function Mascot(props: MascotProps) {
           style={{
             ...layer,
             backgroundImage: `url(${reactions})`,
-            ...cell(REACTIONS.indexOf(reaction ?? 'blink')),
-            opacity: reaction ? 1 : 0,
+            transform: flip ? 'scaleX(-1)' : undefined,
+            ...cell(REACTIONS.indexOf(visibleReaction ?? 'blink')),
+            opacity: visibleReaction ? 1 : 0,
           }}
         />
       </span>

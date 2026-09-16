@@ -1,7 +1,7 @@
 {
   "name": "page-mascot",
   "version": "0.1.0",
-  "description": "An interactive character that watches the cursor and blinks when you poke it.",
+  "description": "Mascot Studio: customize, preview, and export interactive React mascots.",
   "license": "MIT",
   "author": "Kamran Ahmed",
   "homepage": "https://koboyo.com/page-mascot",
@@ -9,7 +9,14 @@
     "type": "git",
     "url": "git+https://github.com/nilbuild/page-mascot.git"
   },
-  "keywords": ["mascot", "avatar", "react", "cursor", "sprite", "portfolio"],
+  "keywords": [
+    "mascot",
+    "avatar",
+    "react",
+    "cursor",
+    "sprite",
+    "portfolio"
+  ],
   "type": "module",
   "sideEffects": false,
   "exports": {
@@ -19,7 +26,11 @@
     }
   },
   "types": "./dist/index.d.ts",
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "dev": "vite",
     "sync:skill": "cp src/mascot.tsx skills/page-mascot/mascot.tsx",
@@ -29,8 +40,10 @@
     "typecheck": "tsc -p tsconfig.json",
     "lint": "oxlint",
     "preview": "vite preview",
-    "deploy": "npm run build:site && wrangler deploy",
-    "prepack": "npm run build"
+    "deploy": "npm run build:site && npx wrangler deploy",
+    "prepack": "npm run build",
+    "test": "node scripts/check-studio.mjs",
+    "format": "prettier --write site src scripts index.html vite.config.ts README.md package.json && npm run sync:skill"
   },
   "peerDependencies": {
     "react": ">=18"
@@ -41,7 +54,9 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^6.1.0",
+    "fflate": "^0.8.3",
     "oxlint": "^1.79.0",
+    "prettier": "^3.9.6",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "tailwindcss": "^4.3.3",
@@ -49,7 +64,7 @@
     "vite": "^8.2.2"
   },
   "engines": {
-    "node": ">=20"
+    "node": "^20.19.0 || >=22.12.0"
   },
   "publishConfig": {
     "access": "public"
