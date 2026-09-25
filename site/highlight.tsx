@@ -9,8 +9,8 @@ const COLOR = {
   attr: 'text-[#f0c274]',
   command: 'text-[#f0c274]',
   flag: 'text-[#7cc1e6]',
-  punct: 'text-paper/45',
-  muted: 'text-paper/60',
+  punct: 'text-on-code/45',
+  muted: 'text-on-code/60',
 }
 
 type Token = {

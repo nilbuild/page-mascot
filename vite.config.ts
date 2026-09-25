@@ -1,3 +1,4 @@
+import path from 'node:path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig, type Plugin } from 'vite'
@@ -35,6 +36,11 @@ function analytics(): Plugin {
 export default defineConfig({
   // The demo is served from koboyo.com/page-mascot.
   base: '/page-mascot/',
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, 'site'),
+    },
+  },
   plugins: [react(), tailwindcss(), analytics()],
   // dist/ is the published component, so the demo builds somewhere else.
   build: { outDir: 'site-build/page-mascot' },

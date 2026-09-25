@@ -12,7 +12,10 @@
     "erasableSyntaxOnly": true,
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      "@/*": ["./site/*"]
+    }
   },
   "include": ["src", "site", "vite.config.ts"]
 }

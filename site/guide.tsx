@@ -40,7 +40,7 @@ function Snippet(props: { children: string; lang?: Lang }) {
 
   return (
     <div className="relative mt-3">
-      <pre className="rounded-xl bg-ink py-3 pr-12 pl-4 font-mono text-[13px] leading-relaxed whitespace-pre-wrap text-paper">
+      <pre className="rounded-xl bg-code py-3 pr-12 pl-4 font-mono text-[13px] leading-relaxed whitespace-pre-wrap text-on-code">
         <code>{highlight(children, lang ?? 'bash')}</code>
       </pre>
 
@@ -48,7 +48,7 @@ function Snippet(props: { children: string; lang?: Lang }) {
         type="button"
         onClick={copy}
         aria-label={copied ? 'Copied' : 'Copy'}
-        className="absolute top-2 right-2 rounded-lg px-2 py-1 font-mono text-[11px] text-paper/40 transition-colors hover:bg-paper/10 hover:text-paper"
+        className="absolute top-2 right-2 rounded-lg px-2 py-1 font-mono text-[11px] text-on-code/40 transition-colors hover:bg-on-code/10 hover:text-on-code"
       >
         {copied ? 'copied' : 'copy'}
       </button>
@@ -191,14 +191,14 @@ export function Guide(props: GuideProps) {
         type="button"
         aria-label="Close"
         onClick={onClose}
-        className="absolute inset-0 h-full w-full cursor-default bg-ink/20"
+        className="absolute inset-0 h-full w-full cursor-default bg-black/25 dark:bg-black/60"
       />
 
       <aside
         role="dialog"
         aria-modal="true"
         aria-label={useThisOne ? `How to use ${character}` : 'How to make your own'}
-        className="absolute inset-y-0 right-0 flex w-full max-w-[620px] animate-[slide-in_220ms_cubic-bezier(0.22,1,0.36,1)] flex-col overflow-y-auto border-l border-ink/10 bg-paper px-7 py-8 shadow-[0_0_50px_rgb(18_16_14/0.12)]"
+        className="absolute inset-y-0 right-0 flex w-full max-w-[620px] animate-[slide-in_220ms_cubic-bezier(0.22,1,0.36,1)] flex-col overflow-y-auto border-l border-ink/10 bg-paper px-7 py-8 shadow-[0_0_50px_rgb(18_16_14/0.12)] dark:shadow-[0_0_60px_rgb(0_0_0/0.45)]"
       >
         <div className="flex items-start justify-between gap-4">
           <div>

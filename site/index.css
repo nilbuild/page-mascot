@@ -1,9 +1,29 @@
 @import 'tailwindcss';
 
-@theme {
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
   --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --color-ink: #12100e;
-  --color-paper: #faf9f7;
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-code: var(--code);
+  --color-on-code: var(--on-code);
+}
+
+:root {
+  --ink: #12100e;
+  --paper: #faf9f7;
+  --code: #12100e;
+  --on-code: #faf9f7;
+  color-scheme: light;
+}
+
+.dark {
+  --ink: #ece7df;
+  --paper: #141210;
+  --code: #221e1b;
+  --on-code: #ece7df;
+  color-scheme: dark;
 }
 
 html {
@@ -11,10 +31,14 @@ html {
 }
 
 body {
-  background-color: var(--color-paper);
-  color: var(--color-ink);
+  background-color: var(--paper);
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background-color: color-mix(in oklab, var(--ink) 16%, transparent);
 }
 
 @keyframes slide-in {
