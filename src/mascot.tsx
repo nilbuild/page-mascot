@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 
-const DIRECTIONS = [
+export const DIRECTIONS = [
   'up-left',
   'up',
   'up-right',
@@ -13,7 +13,7 @@ const DIRECTIONS = [
   'down-right',
 ] as const
 
-const REACTIONS = [
+export const REACTIONS = [
   'blink',
   'heart',
   'sparkle',
@@ -25,8 +25,8 @@ const REACTIONS = [
   'delighted',
 ] as const
 
-type Direction = (typeof DIRECTIONS)[number]
-type Reaction = (typeof REACTIONS)[number]
+export type Direction = (typeof DIRECTIONS)[number]
+export type Reaction = (typeof REACTIONS)[number]
 
 // Clockwise from the right, matching atan2 with y pointing down.
 const CLOCKWISE: Direction[] = [
@@ -43,7 +43,7 @@ const SECTOR = (Math.PI * 2) / CLOCKWISE.length
 const HYSTERESIS = 0.12
 const DEAD_ZONE = 70
 
-const PAYOFFS: Reaction[] = ['heart', 'sparkle', 'delighted']
+const DEFAULT_PAYOFFS: Reaction[] = ['heart', 'sparkle', 'delighted']
 const BOOP_PAYOFF = 120
 const BOOP_END = 560
 const SQUASH_MS = 420
@@ -84,15 +84,36 @@ export type MascotProps = {
   className?: string
   /** What a screen reader calls it. */
   label?: string
+  /**
+   * Poke reaction mode:
+   * - 'escalate': Original curve (blink -> payoffs, rapid spam -> dizzy)
+   * - 'cycle': Sequentially plays through all 9 expressions on each click
+   * - 'random': Randomly picks from all 9 expressions
+   */
+  mode?: 'escalate' | 'cycle' | 'random'
+  /** Custom payoffs for 'escalate' mode */
+  payoffs?: Reaction[]
+  /** Callback fired when a reaction expression plays */
+  onReact?: (reaction: Reaction) => void
 }
 
 export function Mascot(props: MascotProps) {
-  const { directions, reactions, size = 140, className, label = 'mascot' } = props
+  const {
+    directions,
+    reactions,
+    size = 140,
+    className,
+    label = 'mascot',
+    mode = 'escalate',
+    payoffs = DEFAULT_PAYOFFS,
+    onReact,
+  } = props
 
   const buttonRef = useRef<HTMLButtonElement>(null)
   const squashRef = useRef<HTMLSpanElement>(null)
   const timersRef = useRef<number[]>([])
   const boopsRef = useRef({ count: 0, at: 0 })
+  const cycleIndexRef = useRef(0)
   const [direction, setDirection] = useState<Direction>('center')
   const [reaction, setReaction] = useState<Reaction | null>(null)
 
@@ -155,7 +176,12 @@ export function Mascot(props: MascotProps) {
     timersRef.current = []
 
     const later = (ms: number, next: Reaction | null) => {
-      timersRef.current.push(window.setTimeout(() => setReaction(next), ms))
+      timersRef.current.push(
+        window.setTimeout(() => {
+          setReaction(next)
+          if (next) onReact?.(next)
+        }, ms)
+      )
     }
 
     const now = Date.now()
@@ -163,14 +189,29 @@ export function Mascot(props: MascotProps) {
     boops.count = now - boops.at < DIZZY_WINDOW ? boops.count + 1 : 1
     boops.at = now
 
-    if (boops.count >= DIZZY_AFTER) {
-      boops.count = 0
-      setReaction('dizzy')
-      later(DIZZY_END, null)
-    } else {
+    if (mode === 'cycle') {
+      const chosen = REACTIONS[cycleIndexRef.current % REACTIONS.length]
+      cycleIndexRef.current += 1
       setReaction('blink')
-      later(BOOP_PAYOFF, PAYOFFS[(boops.count - 1) % PAYOFFS.length])
+      later(BOOP_PAYOFF, chosen)
       later(BOOP_END, null)
+    } else if (mode === 'random') {
+      const randomIndex = Math.floor(Math.random() * REACTIONS.length)
+      const chosen = REACTIONS[randomIndex]
+      setReaction('blink')
+      later(BOOP_PAYOFF, chosen)
+      later(BOOP_END, null)
+    } else {
+      if (boops.count >= DIZZY_AFTER) {
+        boops.count = 0
+        setReaction('dizzy')
+        onReact?.('dizzy')
+        later(DIZZY_END, null)
+      } else {
+        setReaction('blink')
+        later(BOOP_PAYOFF, payoffs[(boops.count - 1) % payoffs.length])
+        later(BOOP_END, null)
+      }
     }
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
